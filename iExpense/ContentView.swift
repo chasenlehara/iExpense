@@ -37,70 +37,34 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.modelContext) var modelContext
-    @Query var expenseItems: [ExpenseItem]
+    @Query(sort: \ExpenseItem.name) var expenseItems: [ExpenseItem]
 
     @State private var showingAddExpense = false
+    @State private var sortOrder = [
+        SortDescriptor(\ExpenseItem.name),
+        SortDescriptor(\ExpenseItem.amount),
+    ]
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    NavigationLink("Add new expense") {
-                        AddView()
-                    }
-                }
-
-                ForEach(expenseItems) { item in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(item.name)
-                                .font(.headline)
-                            Text(item.type)
-                        }
-
-                        Spacer()
-                        Text(item.amount, format: .currency(code: item.currencyCode))
-                            .foregroundStyle(item.amount < 10 ? .orange : item.amount < 100 ? .blue : .purple)
-                    }
-                }
-                .onDelete(perform: removeItems)
-                
-//                Section("Business") {
-//                        ForEach(expenses.businessItems) { item in
-//                            HStack {
-//                                VStack(alignment: .leading) {
-//                                    Text(item.name)
-//                                        .font(.headline)
-//                                    Text(item.type)
-//                                }
-//
-//                                Spacer()
-//                                Text(item.amount, format: .currency(code: item.currencyCode))
-//                                    .foregroundStyle(item.amount < 10 ? .orange : item.amount < 100 ? .blue : .purple)
-//                            }
-//                        }
-//                        .onDelete(perform: removeItemsFromBusiness)
-//                }
-//                
-//                Section("Personal") {
-//                        ForEach(expenses.personalItems) { item in
-//                            HStack {
-//                                VStack(alignment: .leading) {
-//                                    Text(item.name)
-//                                        .font(.headline)
-//                                    Text(item.type)
-//                                }
-//
-//                                Spacer()
-//                                Text(item.amount, format: .currency(code: item.currencyCode))
-//                                    .foregroundStyle(item.amount < 10 ? .orange : item.amount < 100 ? .blue : .purple)
-//                            }
-//                        }
-//                        .onDelete(perform: removeItemsFromBusiness)
-//                }
-            }
+            ExpensesView(sortOrder: sortOrder)
             .navigationTitle("iExpense")
             .toolbar {
+                Menu("Sort", systemImage: "arrow.up.arrow.down") {
+                    Picker("Sort", selection: $sortOrder) {
+                        Text("Sort by Name")
+                            .tag([
+                                SortDescriptor(\ExpenseItem.name),
+                                SortDescriptor(\ExpenseItem.amount),
+                            ])
+
+                        Text("Sort by Amount")
+                            .tag([
+                                SortDescriptor(\ExpenseItem.amount),
+                                SortDescriptor(\ExpenseItem.name)
+                            ])
+                    }
+                }
                 Button("Add Expense", systemImage: "plus") {
                     showingAddExpense = true
                 }
@@ -109,19 +73,6 @@ struct ContentView: View {
         .sheet(isPresented: $showingAddExpense) {
             AddView()
         }
-    }
-    func removeItems(at offsets: IndexSet) {
-//        expenses.items.remove(atOffsets: offsets)
-    }
-    func removeItemsFromBusiness(at offsets: IndexSet) {
-//        let thisItem = expenses.businessItems[offsets.first!]
-//        let indexInMainList = expenses.items.firstIndex(of: thisItem)
-//        self.removeItems(at: IndexSet(integer: indexInMainList!))
-    }
-    func removeItemsFromPersonal(at offsets: IndexSet) {
-//        let thisItem = expenses.personalItems[offsets.first!]
-//        let indexInMainList = expenses.items.firstIndex(of: thisItem)
-//        self.removeItems(at: IndexSet(integer: indexInMainList!))
     }
 }
 

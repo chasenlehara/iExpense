@@ -10,8 +10,8 @@ import SwiftData
 
 @Model
 class ExpenseItem {// Identifiable, Codable, Equatable
-    var id = UUID()
-    var currencyCode = "USD"
+    var id: UUID
+    var currencyCode: String
     var name: String
     var type: String
     var amount: Double
