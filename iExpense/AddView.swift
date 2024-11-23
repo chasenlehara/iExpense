@@ -5,16 +5,17 @@
 //  Created by Chasen Le Hara on 11/1/24.
 //
 
+import SwiftData
 import SwiftUI
 
 struct AddView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) var modelContext
 
     @State private var name = ""
     @State private var currencyCode = "USD"
     @State private var type = "Personal"
     @State private var amount = 0.0
-    var expenses: Expenses
 
     let currencyCodes = ["AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "INR", "JPY", "MXN", "MYR", "NOK", "NZD", "PHP", "RUB", "SEK", "SGD", "THB", "TRY", "USD", "ZAR"]
     let types = ["Business", "Personal"]
@@ -51,7 +52,7 @@ struct AddView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         let item = ExpenseItem(name: name, type: type, amount: amount)
-                        expenses.items.append(item)
+                        modelContext.insert(item)
                         dismiss()
                     }
                 }
@@ -61,5 +62,12 @@ struct AddView: View {
 }
 
 #Preview {
-    AddView(expenses: Expenses())
+    do {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: ExpenseItem.self, configurations: config)
+        return AddView()
+            .modelContainer(container)
+    } catch {
+        return Text("Failed to create container: \(error.localizedDescription)")
+    }
 }

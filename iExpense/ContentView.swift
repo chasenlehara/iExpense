@@ -5,45 +5,40 @@
 //  Created by Chasen Le Hara on 11/1/24.
 //
 
+import SwiftData
 import SwiftUI
 
-struct ExpenseItem: Identifiable, Codable, Equatable {
-    var id = UUID()
-    var currencyCode = "USD"
-    let name: String
-    let type: String
-    let amount: Double
-}
-
-@Observable
-class Expenses {
-    var items = [ExpenseItem]() {
-        didSet {
-            if let encoded = try? JSONEncoder().encode(items) {
-                UserDefaults.standard.set(encoded, forKey: "Items")
-            }
-        }
-    }
-    init() {
-        if let savedItems = UserDefaults.standard.data(forKey: "Items") {
-            if let decodedItems = try? JSONDecoder().decode([ExpenseItem].self, from: savedItems) {
-                items = decodedItems
-                return
-            }
-        }
-
-        items = []
-    }
-    var businessItems: [ExpenseItem] {
-        return self.items.filter { $0.type == "Business" }
-    }
-    var personalItems: [ExpenseItem] {
-        return self.items.filter { $0.type == "Personal" }
-    }
-}
+//@Observable
+//class Expenses {
+//    var items = [ExpenseItem]() {
+//        didSet {
+//            if let encoded = try? JSONEncoder().encode(items) {
+//                UserDefaults.standard.set(encoded, forKey: "Items")
+//            }
+//        }
+//    }
+//    init() {
+//        if let savedItems = UserDefaults.standard.data(forKey: "Items") {
+//            if let decodedItems = try? JSONDecoder().decode([ExpenseItem].self, from: savedItems) {
+//                items = decodedItems
+//                return
+//            }
+//        }
+//
+//        items = []
+//    }
+//    var businessItems: [ExpenseItem] {
+//        return self.items.filter { $0.type == "Business" }
+//    }
+//    var personalItems: [ExpenseItem] {
+//        return self.items.filter { $0.type == "Personal" }
+//    }
+//}
 
 struct ContentView: View {
-    @State private var expenses = Expenses()
+    @Environment(\.modelContext) var modelContext
+    @Query var expenseItems: [ExpenseItem]
+
     @State private var showingAddExpense = false
 
     var body: some View {
@@ -51,11 +46,11 @@ struct ContentView: View {
             List {
                 Section {
                     NavigationLink("Add new expense") {
-                        AddView(expenses: expenses)
+                        AddView()
                     }
                 }
 
-                ForEach(expenses.items) { item in
+                ForEach(expenseItems) { item in
                     HStack {
                         VStack(alignment: .leading) {
                             Text(item.name)
@@ -70,39 +65,39 @@ struct ContentView: View {
                 }
                 .onDelete(perform: removeItems)
                 
-                Section("Business") {
-                        ForEach(expenses.businessItems) { item in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(item.name)
-                                        .font(.headline)
-                                    Text(item.type)
-                                }
-
-                                Spacer()
-                                Text(item.amount, format: .currency(code: item.currencyCode))
-                                    .foregroundStyle(item.amount < 10 ? .orange : item.amount < 100 ? .blue : .purple)
-                            }
-                        }
-                        .onDelete(perform: removeItemsFromBusiness)
-                }
-                
-                Section("Personal") {
-                        ForEach(expenses.personalItems) { item in
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(item.name)
-                                        .font(.headline)
-                                    Text(item.type)
-                                }
-
-                                Spacer()
-                                Text(item.amount, format: .currency(code: item.currencyCode))
-                                    .foregroundStyle(item.amount < 10 ? .orange : item.amount < 100 ? .blue : .purple)
-                            }
-                        }
-                        .onDelete(perform: removeItemsFromBusiness)
-                }
+//                Section("Business") {
+//                        ForEach(expenses.businessItems) { item in
+//                            HStack {
+//                                VStack(alignment: .leading) {
+//                                    Text(item.name)
+//                                        .font(.headline)
+//                                    Text(item.type)
+//                                }
+//
+//                                Spacer()
+//                                Text(item.amount, format: .currency(code: item.currencyCode))
+//                                    .foregroundStyle(item.amount < 10 ? .orange : item.amount < 100 ? .blue : .purple)
+//                            }
+//                        }
+//                        .onDelete(perform: removeItemsFromBusiness)
+//                }
+//                
+//                Section("Personal") {
+//                        ForEach(expenses.personalItems) { item in
+//                            HStack {
+//                                VStack(alignment: .leading) {
+//                                    Text(item.name)
+//                                        .font(.headline)
+//                                    Text(item.type)
+//                                }
+//
+//                                Spacer()
+//                                Text(item.amount, format: .currency(code: item.currencyCode))
+//                                    .foregroundStyle(item.amount < 10 ? .orange : item.amount < 100 ? .blue : .purple)
+//                            }
+//                        }
+//                        .onDelete(perform: removeItemsFromBusiness)
+//                }
             }
             .navigationTitle("iExpense")
             .toolbar {
@@ -112,21 +107,21 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showingAddExpense) {
-            AddView(expenses: expenses)
+            AddView()
         }
     }
     func removeItems(at offsets: IndexSet) {
-        expenses.items.remove(atOffsets: offsets)
+//        expenses.items.remove(atOffsets: offsets)
     }
     func removeItemsFromBusiness(at offsets: IndexSet) {
-        let thisItem = expenses.businessItems[offsets.first!]
-        let indexInMainList = expenses.items.firstIndex(of: thisItem)
-        self.removeItems(at: IndexSet(integer: indexInMainList!))
+//        let thisItem = expenses.businessItems[offsets.first!]
+//        let indexInMainList = expenses.items.firstIndex(of: thisItem)
+//        self.removeItems(at: IndexSet(integer: indexInMainList!))
     }
     func removeItemsFromPersonal(at offsets: IndexSet) {
-        let thisItem = expenses.personalItems[offsets.first!]
-        let indexInMainList = expenses.items.firstIndex(of: thisItem)
-        self.removeItems(at: IndexSet(integer: indexInMainList!))
+//        let thisItem = expenses.personalItems[offsets.first!]
+//        let indexInMainList = expenses.items.firstIndex(of: thisItem)
+//        self.removeItems(at: IndexSet(integer: indexInMainList!))
     }
 }
 
