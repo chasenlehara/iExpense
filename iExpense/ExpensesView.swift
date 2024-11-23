@@ -11,17 +11,25 @@ import SwiftUI
 struct ExpensesView: View {
     @Query var expenses: [ExpenseItem]
     
-    init(sortOrder: [SortDescriptor<ExpenseItem>]) {
-        _expenses = Query(sort: sortOrder)
+    init(expenseType: ExpenseType, sortOrder: [SortDescriptor<ExpenseItem>]) {
+        let expenseTypeString: String
+        switch expenseType {
+        case .business:
+            expenseTypeString = "Business"
+        case .personal:
+            expenseTypeString = "Personal"
+        default:
+            expenseTypeString = ""
+        }
+        
+        _expenses = Query(
+            filter: #Predicate<ExpenseItem> { expenseItem in
+                expenseTypeString.isEmpty || expenseItem.type == expenseTypeString
+            },
+            sort: sortOrder
+        )
     }
     var body: some View {
-            List {
-                Section {
-                    NavigationLink("Add new expense") {
-                        AddView()
-                    }
-                }
-
                 ForEach(expenses) { item in
                     HStack {
                         VStack(alignment: .leading) {
@@ -70,7 +78,6 @@ struct ExpensesView: View {
 //                        }
 //                        .onDelete(perform: removeItemsFromBusiness)
 //                }
-            }
     }
     func removeItems(at offsets: IndexSet) {
 //        expenses.items.remove(atOffsets: offsets)
@@ -88,6 +95,6 @@ struct ExpensesView: View {
 }
 
 #Preview {
-    ExpensesView(sortOrder: [SortDescriptor(\ExpenseItem.name)])
+    ExpensesView(expenseType: .all, sortOrder: [SortDescriptor(\ExpenseItem.name)])
         .modelContainer(for: ExpenseItem.self)
 }

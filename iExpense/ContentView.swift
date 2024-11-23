@@ -35,9 +35,14 @@ import SwiftUI
 //    }
 //}
 
+enum ExpenseType: String, Codable {
+    case all, business, personal
+}
+
 struct ContentView: View {
     @Environment(\.modelContext) var modelContext
     @Query(sort: \ExpenseItem.name) var expenseItems: [ExpenseItem]
+    @State private var expenseType: ExpenseType = .all
 
     @State private var showingAddExpense = false
     @State private var sortOrder = [
@@ -47,7 +52,22 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            ExpensesView(sortOrder: sortOrder)
+            List {
+                Section {
+                    NavigationLink("Add new expense") {
+                        AddView()
+                    }
+                }
+                
+                Picker("Which expenses?", selection: $expenseType) {
+                    Text("All").tag(ExpenseType.all)
+                    Text("Business").tag(ExpenseType.business)
+                    Text("Personal").tag(ExpenseType.personal)
+                }
+                .pickerStyle(.segmented)
+                
+                ExpensesView(expenseType: expenseType, sortOrder: sortOrder)
+            }
             .navigationTitle("iExpense")
             .toolbar {
                 Menu("Sort", systemImage: "arrow.up.arrow.down") {
